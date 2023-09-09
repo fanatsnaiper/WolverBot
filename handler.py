@@ -1,6 +1,8 @@
 from consts import *
 from engine.botError import *
 from engine.valid import *
+import telebot
+from telebot import types
 TREE = []
 
 @bot.message_handler(commands=['start'])
@@ -373,27 +375,34 @@ def delete_player_pt2(message):
 
         else:
             name=check_for_delete(db_session,player_info)
-            buttons_list = ['Подтвердить','Отмена']
-            delete_player = Keyboard(buttons_list)
-            bot.send_message(chat_id=message.chat.id, text=f'Подтвердите удаление игрока\t{name}',reply_markup=delete_player.get_keyboard())
-            bot.register_next_step_handler(message, delete_player_pt3, player_info)
+            markup = ReplyKeyboardMarkup
+            button_list = ['Подтвердить', 'Отменить']
+            markup=Keyboard(button_list)
+            bot.send_message(chat_id=message.chat.id, text=f'Подтвердите удаление игрока\t{name}',reply_markup=markup.get_keyboard())          
     else:
         output=BotValueError.process()
         bot.send_message(chat_id=message.chat.id, text=output)
 
-def delete_player_pt3(message,player_info):
-    buttons_list = ['Подтвердить','Отмена']
-    delete_player = Keyboard(buttons_list)
-    bot.send_message(chat_id=message.chat.id,text="",reply_markup=delete_player.get_keyboard())
 
-    if message.text=="Подтвердить":
+@bot.message_handler(content_types=['text'])
+def func(message):
+    if(message.text == "Подтвердить"):
+        #db_delete_player(db_session,player_info)
+        bot.send_message(message.chat.id, text=f"Игрок удалён")
+    elif(message.text == "Отменить"):
+        bot.send_message(message.chat.id, text="Удаление отменено")
+
+"""
+@bot.callback_query_handler(func=lambda call: True)
+def answer(call,player_info):
+    if call.data=="y":
         db_delete_player(db_session,player_info)
-        bot.send_message(chat_id=message.chat.id, text="Игрок удалён")
-    if message.text=="Отмена":
-        bot.register_next_step_handler(message, delete_player_pt1)
-
-
-
+        print("Удалён")
+        #bot.send_message(chat_id=call.chat.id, text="Игрок удалён")
+    if call.data=="n":
+        print("Отменено")
+        #bot.send_message(chat_id=call.chat.id, text="Удаление отменено")
+"""
 """
 --------------------------------------------------  рассылка    ------------------------------------------------------
 """
