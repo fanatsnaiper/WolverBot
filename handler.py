@@ -302,60 +302,52 @@ def add_delete_player(message):
 
 @bot.message_handler(func=lambda message: message.text=='Добавить игрока')
 def add_player_pt1(message):
-
     player_info = []
     bot.send_message(chat_id=message.chat.id,text='Введите фамилию и имя игрока')
     bot.register_next_step_handler(message, type_player_name,player_info)
 
 def type_player_name(message,player_info):
-
     name = message.text
     if TextValidator.validatePlayerName(name) == True:
-        """
-        for sql=f"select name from players where name = '{name}'":
-            if sql not null:
-            bot.send_message(chat_id=message.chat.id, text='Игрок с таким именем уже существует')
-            предложить проверить список игроков и корректность внесённой информации
-        """
+        name=str(name)
         player_info.append(name)
-        bot.send_message(chat_id=message.chat.id,text='Введите номер игрока')
-        bot.register_next_step_handler(message, type_player_number,player_info)
+        if check_name(db_session,player_info)==False:
+            bot.send_message(chat_id=message.chat.id,text='Введите номер игрока')
+            bot.register_next_step_handler(message, type_player_number, player_info)
+        else:
+            bot.send_message(chat_id=message.chat.id, text='Игрок с таким именем уже существует')
+
     else:
-        BotValueError.process()
+        output=BotValueError.process()
+        bot.send_message(chat_id=message.chat.id, text=output)
 
 def type_player_number(message, player_info):
     number=message.text
     if IntValidator.validateValue(number) == True:
-        """
-        for sql=f"select name from players where number = {number}":
-            if sql not null:
-            bot.send_message(chat_id=message.chat.id, text='Игровой номер --{number}-- занят')
-            предложить выбрать другой номер
-        """
         number=int(number)
         player_info.append(number)
-        bot.send_message(chat_id=message.chat.id,text='Введите tg_id игрока')
-        bot.register_next_step_handler(message, type_tg_id,player_info)
+        if check_number(db_session,player_info)==False:
+            bot.send_message(chat_id=message.chat.id,text='Введите tg_id игрока')
+            bot.register_next_step_handler(message, type_tg_id, player_info)
+        else:
+            bot.send_message(chat_id=message.chat.id,text='Данный номер занят')
     else:
-        BotValueError.process()
+        output=BotValueError.process()
+        bot.send_message(chat_id=message.chat.id, text=output)
 
 def type_tg_id(message,player_info):
-
     tg_id = message.text
     if IntValidator.validateValue(tg_id) == True:
-        """
-        for sql=f"select name from players where tg_id = {tg_id}":
-            if sql not null:
-            bot.send_message(chat_id=message.chat.id, text='Данный --{tg_id}-- уже принадлежит кому-то')
-            предложить выбрать другой номер
-        """
-        tg_id = int(tg_id)
+        tg_id=str(tg_id)
         player_info.append(tg_id)
-
-        bot.send_message(chat_id=message.chat.id, text='Игрок добавлен')
-        db_insert_player(db_session,player_info)
+        if check_tg_id(db_session,player_info)==False:
+            bot.send_message(chat_id=message.chat.id, text='Игрок добавлен')
+            db_insert_player(db_session,player_info)
+        else:
+            bot.send_message(chat_id=message.chat.id, text='Данный tg_id уже принадлежит другому игроку')
     else:
-        BotValueError.process()
+        output=BotValueError.process()
+        bot.send_message(chat_id=message.chat.id, text=output)
 
 @bot.message_handler(func=lambda message: message.text=='Удалить игрока')
 def delete_player_pt1(message):
@@ -369,12 +361,12 @@ def delete_player_pt2(message):
         number=int(number)
         player_info=[]
         player_info.append(number)
-        if check_for_delete(db_session,player_info)==False:
+        if check_number(db_session,player_info)==False:
             bot.send_message(chat_id=message.chat.id, text='Игрока с таким номером не существует')
             bot.register_next_step_handler(message, delete_player_pt1)
 
         else:
-            name=check_for_delete(db_session,player_info)
+            name=check_number(db_session,player_info)
             markup = ReplyKeyboardMarkup
             button_list = ['Подтвердить', 'Отменить']
             markup=Keyboard(button_list)

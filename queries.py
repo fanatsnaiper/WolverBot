@@ -150,8 +150,8 @@ def db_feedback_check(conn):
         arr.append(row)
     return(arr)
 
-def check_for_delete(conn,player_info):
-    number=player_info[0]
+def check_number(conn,player_info):
+    number=player_info[1]
     sql=f"select name from players where number={number}"
     conn.execute(sql)
     list=[]
@@ -165,3 +165,29 @@ def check_for_delete(conn,player_info):
         for i in range(0,len(list)):
             output+=f'{list[i]}'
         return (output)
+    
+def check_name(conn,player_info):
+    name=player_info[0]
+    sql=f"select number from players where name='{name}'"
+    conn.execute(sql)
+    list=[]
+    result=conn.fetch_all()
+    for row in result:
+        list.append(row)
+    if not list:
+        return False
+    else:
+        return True
+        
+def check_tg_id(conn,player_info):
+    tg_id=player_info[2]
+    sql=f"select number from players where tg_id='{tg_id}'"
+    conn.execute(sql)
+    list=[]
+    result=conn.fetch_all()
+    for row in result:
+        list.append(row)
+    if not list:
+        return False
+    else:
+        return True

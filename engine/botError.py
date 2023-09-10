@@ -13,7 +13,7 @@ class BotError(ABC):
 class BotValueError(BotError):
     @staticmethod
     def process():
-        error_message="Ожидалось число"
+        error_message="Неверный тип данных"
         return(error_message)
 
 class BotConnError(BotError):
