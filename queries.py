@@ -191,3 +191,14 @@ def check_tg_id(conn,player_info):
         return False
     else:
         return True
+
+def change_stat_team_alltime(conn, game_info):
+    wins= game_info[1]
+    loses = game_info[2]
+    draws = game_info[3]
+    gs=game_info[4]
+    gc=game_info[5]
+    yc=game_info[6]
+    rc=game_info[7]
+    sql=f"update team_stat_all_time set games = games + 1, wins=wins +{wins}, loses= loses+ {loses}, draws = draws+{draws}, goals_scored= goals_scored+ {gs}, goals_conceded=goals_conceded + {gc}, yellow_cards= yellow_cards + {yc}, red_cards= red_cards+ {rc}"
+    conn.execute(sql)

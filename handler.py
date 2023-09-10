@@ -26,7 +26,7 @@ def send_start(message,initial = True ):
         buttons_list = ['Моя статистика','Команда','Управление командой']
         menu_keyboard = Keyboard(buttons_list)
 
-        bot.send_photo(chat_id=message.chat.id,photo=InputFile(MAIN_PHOTO))
+        #bot.send_photo(chat_id=message.chat.id,photo=InputFile(MAIN_PHOTO))
         bot.send_message(chat_id=message.chat.id, text='Главное меню', reply_markup=menu_keyboard.get_keyboard())
     else:
         user = User(message)
@@ -268,14 +268,91 @@ def team_management(message):
     if message.text !='Вернуться':
         TREE.append(message.text) # добавляем родительский раздел, чтобы понять, какую статистику выдать
 
-    buttons_list = ['Изменить статистику','Изменить состав команды', 'Подготовить рассылку', 'Редактировать профиль игрока', 'Вернуться']
+    buttons_list = ['Результат матча','Подготовить рассылку','Изменить статистику','Изменить состав команды', 'Редактировать профиль игрока', 'Вернуться']
     team_management_keyboard = Keyboard(buttons_list)
     bot.send_message(chat_id=message.chat.id, text='Меню управления командой',reply_markup=team_management_keyboard.get_keyboard())
+
+@bot.message_handler(func=lambda message: message.text=='Результат матча')
+def game_result(message):
+    if message.text !='Вернуться':
+        TREE.append(message.text)
+
+    game_info=[]
+    bot.send_message(chat_id=message.chat.id, text='Счёт игры (забито : пропущено):')
+    bot.register_next_step_handler(message, team_stat_pt1 ,game_info)
+
+def team_stat_pt1(message,game_info):
+    string=message.text
+    scored=string.split(":")[0]
+    conceded=string.split(":")[1]
+
+    wins=0
+    loses=0
+    draws=0
+    if scored!=conceded:
+        if scored>conceded:
+            wins=1
+            loses=0
+            draws=0
+            result="победа"
+
+        if scored<conceded:
+            wins=0
+            loses=1
+            draws=0
+            result="поражение"
+    else:
+        wins=0
+        loses=0
+        draws=1
+        result="ничья"
+    game_info.append(result)
+    game_info.append(wins)
+    game_info.append(loses)
+    game_info.append(draws)
+    game_info.append(scored)
+    game_info.append(conceded)
+
+    print(game_info[4]+" "+game_info[5])
+    print(game_info[1])
+    print(game_info[2])
+    print(game_info[3])
+
+    bot.send_message(chat_id=message.chat.id, text='Карточки(жёлтые:красные):')
+    bot.register_next_step_handler(message, team_stat_pt2 ,game_info)
+
+def team_stat_pt2(message, game_info):
+    string=message.text
+    yellow=string.split(":")[0]
+    red=string.split(":")[1]
+
+    game_info.append(yellow)
+    game_info.append(red)
+
+    print(game_info[6])
+    print(game_info[7])
+
+    bot.send_message(chat_id=message.chat.id, text='Проверьте данные:')
+    bot.register_next_step_handler(message, team_stat_pt3 ,game_info)
+
+def team_stat_pt3(message, game_info):
+    if game_info[0]=="поражение":
+        text=f"Поражение\nЗабито: {game_info[4]}\nПропущено: {game_info[5]}\nЖёлтые карточки: {game_info[6]}\nКрасные карточки: {game_info[7]}"
+    if game_info[0]=="победа":
+        text=f"Победа\nЗабито: {game_info[4]}\nПропущено: {game_info[5]}\nЖёлтые карточки: {game_info[6]}\nКрасные карточки: {game_info[7]}"
+    if game_info[0]=="ничья":
+        text=f"Ничья\nЗабито: {game_info[4]}\nПропущено: {game_info[5]}\nЖёлтые карточки: {game_info[6]}\nКрасные карточки: {game_info[7]}"
+
+    bot.send_message(chat_id=message.chat.id, text=text)
+    bot.register_next_step_handler(message, team_stat_pt4 ,game_info)
+
+def team_stat_pt4(message,game_info):
+    change_stat_team_alltime(db_session, game_info)
+    bot.send_message(chat_id=message.chat.id, text="Статистика изменена")
 
 """
 ----------------------------------------------- управление статистикой  -----------------------------------------------------
 """
-
 @bot.message_handler(func=lambda message: message.text=='Изменить статистику')
 def add_delete_player_pt1(message):
     if message.text !='Вернуться':
