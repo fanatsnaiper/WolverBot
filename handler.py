@@ -127,7 +127,6 @@ def send_my_all_time_stat(message):
     player_info=[]
     player_info.append(tg_id)
     
-    my_all_time_stat=db_player_all_time_stat(db_session,player_info)
     text = db_player_all_time_stat(db_session,player_info)
     bot.send_message(chat_id=message.chat.id, text=text)
 
@@ -231,22 +230,253 @@ def send_team_season_2023_stat(message):
 
 @bot.message_handler(func=lambda message: message.text=='Статистика игроков')
 def send_players_list(message):
-    #либо выводить список игроков InlineButton и по нажатию показывать статистику, либо добавить эту функцию в раздел список игроков
-    """
     if message.text !='Вернуться':
         TREE.append(message.text)
 
-    buttons_list = ['Выберите игрока', 'Вернуться']
-    team_by_season_keyboard = Keyboard(buttons_list)
+    markup = types.InlineKeyboardMarkup()
+    btn1=types.InlineKeyboardButton(text="Павловичев Кирилл", callback_data="1")
+    btn2=types.InlineKeyboardButton(text="Серов Егор", callback_data="2")
+    btn3=types.InlineKeyboardButton(text="Мельников Глеб", callback_data="3")
+    btn4=types.InlineKeyboardButton(text="Светлаков Лев", callback_data="4")
+    btn5=types.InlineKeyboardButton(text="Амирбеков Садам", callback_data="5")
+    btn6=types.InlineKeyboardButton(text="Белый Иван", callback_data="6")
+    btn7=types.InlineKeyboardButton(text="Яковлев Михаил", callback_data="7")
+    btn8=types.InlineKeyboardButton(text="Кожемякин Игнат", callback_data="8")
+    btn9=types.InlineKeyboardButton(text="Каплин Андрей", callback_data="9")
+    btn10=types.InlineKeyboardButton(text="Куренинов Вадим", callback_data="10")
+    btn11=types.InlineKeyboardButton(text="Чуканов Кирилл", callback_data="11")
+    btn12=types.InlineKeyboardButton(text="Таболин Михаил", callback_data="12")
+    btn13=types.InlineKeyboardButton(text="Низамов Алексей", callback_data="13")
+    btn14=types.InlineKeyboardButton(text="Рой Игорь", callback_data="14")
+    btn15=types.InlineKeyboardButton(text="Порвал Резинкин", callback_data="15")
+    btn16=types.InlineKeyboardButton(text="Кожемякин Захар", callback_data="16")
+    btn17=types.InlineKeyboardButton(text="Мальцев Константин", callback_data="17")
+    btn18=types.InlineKeyboardButton(text="Рожков Руслан", callback_data="18")
 
-    player_list=db_players_list(db_session)
-    msg=""
-    for i in range (0,len(player_list)):
-        msg+=f'{player_list[i][1]}\nНомер:{player_list[i][0]}\n,{player_list[i][2]}\n\n'
+    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11, btn12, btn13, btn14, btn15, btn16, btn17, btn18)
+    bot.send_message(chat_id=message.chat.id, text="Выберите игрока",reply_markup=markup)      
 
-    bot.send_message(chat_id=message.chat.id, text='Выберите игрока')
-    """
-    bot.send_message(chat_id=message.chat.id, text='В скором времени')
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    if call.message:
+        player_info=[]
+        if call.data == "1":
+            name="Павловичев Кирилл"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "2":
+            name="Серов Егор"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "3":
+            name="Мельников Глеб"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "4":
+            name="Светлаков Лев"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "5":
+            name="Амирбеков Садам"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "6":
+            name="Белый Иван"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "7":
+            name="Яковлев Михаил"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "8":
+            name="Кожемякин Игнат"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "9":
+            name="Каплин Андрей"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "10":
+            name="Куренинов Вадим"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "11":
+            name="Чуканов Кирилл"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "12":
+            name="Таболин Михаил"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "13":
+            name="Низамов Алексей"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "14":
+            name="Рой Игорь"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "15":
+            name="Порвал Резинкин"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "16":
+            name="Кожемякин Захар"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "17":
+            name="Мальцев Константин"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+        if call.data == "18":
+            name="Рожков Руслан"
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info=[]
+            player_info.append(tg_id)
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+
 
 
 
@@ -283,57 +513,71 @@ def game_result(message):
 
 def team_stat_pt1(message,game_info):
     string=message.text
-    scored=string.split(":")[0]
-    conceded=string.split(":")[1]
 
-    wins=0
-    loses=0
-    draws=0
-    if scored!=conceded:
-        if scored>conceded:
-            wins=1
+    #scored=string.split(":")[0]
+    #conceded=string.split(":")[1]
+    if IntValidator.validateValue(string.split(":")[0]) == True:
+        scored=string.split(":")[0]
+        if IntValidator.validateValue(string.split(":")[1]) == True:
+            conceded=string.split(":")[1]
+            wins=0
             loses=0
             draws=0
-            result="победа"
+            if scored!=conceded:
+                if scored>conceded:
+                    wins=1
+                    loses=0
+                    draws=0
+                    result="победа"
 
-        if scored<conceded:
-            wins=0
-            loses=1
-            draws=0
-            result="поражение"
+                if scored<conceded:
+                    wins=0
+                    loses=1
+                    draws=0
+                    result="поражение"
+            else:
+                wins=0
+                loses=0
+                draws=1
+                result="ничья"
+            game_info.append(result)
+            game_info.append(wins)
+            game_info.append(loses)
+            game_info.append(draws)
+            game_info.append(scored)
+            game_info.append(conceded)
+
+            print(game_info[4]+" "+game_info[5])
+            print(game_info[1])
+            print(game_info[2])
+            print(game_info[3])
+
+            bot.send_message(chat_id=message.chat.id, text='Карточки(жёлтые:красные):')
+            bot.register_next_step_handler(message, team_stat_pt2 ,game_info)
+        else:
+            output=BotValueError.process()
+            bot.send_message(chat_id=message.chat.id, text=output)
     else:
-        wins=0
-        loses=0
-        draws=1
-        result="ничья"
-    game_info.append(result)
-    game_info.append(wins)
-    game_info.append(loses)
-    game_info.append(draws)
-    game_info.append(scored)
-    game_info.append(conceded)
-
-    print(game_info[4]+" "+game_info[5])
-    print(game_info[1])
-    print(game_info[2])
-    print(game_info[3])
-
-    bot.send_message(chat_id=message.chat.id, text='Карточки(жёлтые:красные):')
-    bot.register_next_step_handler(message, team_stat_pt2 ,game_info)
+        output=BotValueError.process()
+        bot.send_message(chat_id=message.chat.id, text=output)
 
 def team_stat_pt2(message, game_info):
     string=message.text
     yellow=string.split(":")[0]
     red=string.split(":")[1]
+    if IntValidator.validateValue(yellow) == True:
+        if IntValidator.validateValue(red) == True:
+            game_info.append(yellow)
+            game_info.append(red)
 
-    game_info.append(yellow)
-    game_info.append(red)
+            print(game_info[6])
+            print(game_info[7])
 
-    print(game_info[6])
-    print(game_info[7])
-
-    bot.send_message(chat_id=message.chat.id, text='Проверьте данные:')
-    bot.register_next_step_handler(message, team_stat_pt3 ,game_info)
+            bot.send_message(chat_id=message.chat.id, text='Проверьте данные:')
+            bot.register_next_step_handler(message, team_stat_pt3 ,game_info)
+    else:
+        output=BotValueError.process()
+        bot.send_message(chat_id=message.chat.id, text=output)
 
 def team_stat_pt3(message, game_info):
     if game_info[0]=="поражение":
@@ -475,8 +719,6 @@ def answer(call,player_info):
 """
 --------------------------------------------------  рассылка    ------------------------------------------------------
 """
-
-#нет проверки информации
 @bot.message_handler(func=lambda message: message.text=='Подготовить рассылку')
 def mailing_variants(message):
     if message.text !='Вернуться':

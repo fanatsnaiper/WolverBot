@@ -16,6 +16,16 @@ def get_player_number(conn,tg_id):
         number=row
     return(number)
 
+def get_player_tg(conn, player_info):
+    name=player_info[0]
+    sql = f'select tg_id from players where name="{name}"'
+    conn.execute(sql)
+    tg_id =''
+    result=conn.fetch_next()
+    for row in result:
+        tg_id=row
+    return(tg_id)
+
 def db_players_list(conn):
     sql="select number, name, vk_id from players"
     conn.execute(sql)
