@@ -38,7 +38,6 @@ def db_players_list(conn):
         output+= f'{list[i][1]}\nНомер: {list[i][0]}\n{list[i][2]}\n\n'  
 
     return(output)
-    #return(list)
 
 def db_player_all_time_stat(conn,player_info):
     tg_id=player_info[0]

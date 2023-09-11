@@ -498,7 +498,7 @@ def team_management(message):
     if message.text !='Вернуться':
         TREE.append(message.text) # добавляем родительский раздел, чтобы понять, какую статистику выдать
 
-    buttons_list = ['Результат матча','Подготовить рассылку','Изменить статистику','Изменить состав команды', 'Редактировать профиль игрока', 'Вернуться']
+    buttons_list = ['Результат матча','Подготовить рассылку','Изменить состав команды', 'Редактировать профиль игрока', 'Вернуться']
     team_management_keyboard = Keyboard(buttons_list)
     bot.send_message(chat_id=message.chat.id, text='Меню управления командой',reply_markup=team_management_keyboard.get_keyboard())
 
@@ -513,9 +513,6 @@ def game_result(message):
 
 def team_stat_pt1(message,game_info):
     string=message.text
-
-    #scored=string.split(":")[0]
-    #conceded=string.split(":")[1]
     if IntValidator.validateValue(string.split(":")[0]) == True:
         scored=string.split(":")[0]
         if IntValidator.validateValue(string.split(":")[1]) == True:
@@ -547,11 +544,6 @@ def team_stat_pt1(message,game_info):
             game_info.append(scored)
             game_info.append(conceded)
 
-            print(game_info[4]+" "+game_info[5])
-            print(game_info[1])
-            print(game_info[2])
-            print(game_info[3])
-
             bot.send_message(chat_id=message.chat.id, text='Карточки(жёлтые:красные):')
             bot.register_next_step_handler(message, team_stat_pt2 ,game_info)
         else:
@@ -569,9 +561,6 @@ def team_stat_pt2(message, game_info):
         if IntValidator.validateValue(red) == True:
             game_info.append(yellow)
             game_info.append(red)
-
-            print(game_info[6])
-            print(game_info[7])
 
             bot.send_message(chat_id=message.chat.id, text='Проверьте данные:')
             bot.register_next_step_handler(message, team_stat_pt3 ,game_info)
@@ -593,18 +582,6 @@ def team_stat_pt3(message, game_info):
 def team_stat_pt4(message,game_info):
     change_stat_team_alltime(db_session, game_info)
     bot.send_message(chat_id=message.chat.id, text="Статистика изменена")
-
-"""
------------------------------------------------ управление статистикой  -----------------------------------------------------
-"""
-@bot.message_handler(func=lambda message: message.text=='Изменить статистику')
-def add_delete_player_pt1(message):
-    if message.text !='Вернуться':
-        TREE.append(message.text) # добавляем родительский раздел, чтобы понять, какую статистику выдать
-
-    buttons_list = ['Статистика команды', 'Статистика игрока', 'Вернуться']
-    add_new_player_keyboard = Keyboard(buttons_list)
-    bot.send_message(chat_id=message.chat.id, text='Выберите раздел',reply_markup=add_new_player_keyboard.get_keyboard())
 
 
 """
@@ -705,17 +682,7 @@ def func(message):
     elif(message.text == "Отменить"):
         bot.send_message(message.chat.id, text="Удаление отменено")
 
-"""
-@bot.callback_query_handler(func=lambda call: True)
-def answer(call,player_info):
-    if call.data=="y":
-        db_delete_player(db_session,player_info)
-        print("Удалён")
-        #bot.send_message(chat_id=call.chat.id, text="Игрок удалён")
-    if call.data=="n":
-        print("Отменено")
-        #bot.send_message(chat_id=call.chat.id, text="Удаление отменено")
-"""
+
 """
 --------------------------------------------------  рассылка    ------------------------------------------------------
 """
@@ -895,7 +862,8 @@ def type_number(message):
         bot.send_message(chat_id=message.chat.id, text='Введите ссылку на профиль в Вконтакте')
         bot.register_next_step_handler(message, type_vk_id,player_info)
     else:
-        BotValueError.process()
+        output=BotValueError.process()
+        return(output)
 
 def type_vk_id(message, player_info):
     vk_id=message.text
@@ -907,4 +875,5 @@ def type_vk_id(message, player_info):
         bot.send_message(chat_id=message.chat.id, text='Профиль изменён')
         db_insert_vk_id(db_session,player_info)
     else:
-        BotValueError.process()
+        output=BotValueError.process()
+        return(output)
