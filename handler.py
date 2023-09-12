@@ -198,7 +198,7 @@ def send_team_stat(message):
 
     buttons_list = ['Статистика команды по сезонам', 'Статистика команды за всё время','Вернуться']
     stat_keyboard = Keyboard(buttons_list)
-    bot.send_message(chat_id=message.chat.id, text='Выберите сезон', reply_markup=stat_keyboard.get_keyboard())
+    bot.send_message(chat_id=message.chat.id, text='Выберите период', reply_markup=stat_keyboard.get_keyboard())
 
 @bot.message_handler(func=lambda message: message.text=='Статистика команды за всё время')
 def send_team_all_time_stat(message):
@@ -555,18 +555,23 @@ def team_stat_pt1(message,game_info):
 
 def team_stat_pt2(message, game_info):
     string=message.text
-    yellow=string.split(":")[0]
-    red=string.split(":")[1]
-    if IntValidator.validateValue(yellow) == True:
-        if IntValidator.validateValue(red) == True:
-            game_info.append(yellow)
-            game_info.append(red)
-
-            bot.send_message(chat_id=message.chat.id, text='Проверьте данные:')
-            bot.register_next_step_handler(message, team_stat_pt3 ,game_info)
-    else:
+    if not string.find(":"):
         output=BotValueError.process()
         bot.send_message(chat_id=message.chat.id, text=output)
+    else:
+
+        yellow=string.split(":")[0]
+        red=string.split(":")[1]
+        if IntValidator.validateValue(yellow) == True:
+            if IntValidator.validateValue(red) == True:
+                game_info.append(yellow)
+                game_info.append(red)
+
+                bot.send_message(chat_id=message.chat.id, text='Проверьте данные:')
+                team_stat_pt3(message,game_info)
+        else:
+            output=BotValueError.process()
+            bot.send_message(chat_id=message.chat.id, text=output)
 
 def team_stat_pt3(message, game_info):
     if game_info[0]=="поражение":
@@ -576,12 +581,21 @@ def team_stat_pt3(message, game_info):
     if game_info[0]=="ничья":
         text=f"Ничья\nЗабито: {game_info[4]}\nПропущено: {game_info[5]}\nЖёлтые карточки: {game_info[6]}\nКрасные карточки: {game_info[7]}"
 
-    bot.send_message(chat_id=message.chat.id, text=text)
+    buttons_list = ['Подтвердить', 'Отменить']
+    keyboard = Keyboard(buttons_list)
+    bot.send_message(chat_id=message.chat.id, text=text, reply_markup=keyboard.get_keyboard())
     bot.register_next_step_handler(message, team_stat_pt4 ,game_info)
 
+
 def team_stat_pt4(message,game_info):
-    change_stat_team_alltime(db_session, game_info)
-    bot.send_message(chat_id=message.chat.id, text="Статистика изменена")
+    command=message.text
+    if command =="Подтвердить":
+        change_stat_team_alltime(db_session, game_info)
+        bot.send_message(chat_id=message.chat.id, text="Статистика изменена")
+        print(game_info[1])
+    if command =="Отменить":
+        game_result(message)
+        print(game_info[0])
 
 
 """
@@ -661,26 +675,27 @@ def delete_player_pt2(message):
         player_info.append(number)
         if check_number(db_session,player_info)==False:
             bot.send_message(chat_id=message.chat.id, text='Игрока с таким номером не существует')
-            bot.register_next_step_handler(message, delete_player_pt1)
+            delete_player_pt1(message)
 
         else:
             name=check_number(db_session,player_info)
             markup = ReplyKeyboardMarkup
             button_list = ['Подтвердить', 'Отменить']
             markup=Keyboard(button_list)
-            bot.send_message(chat_id=message.chat.id, text=f'Подтвердите удаление игрока\t{name}',reply_markup=markup.get_keyboard())          
+            bot.send_message(chat_id=message.chat.id, text=f'Подтвердите удаление игрока\t{name}',reply_markup=markup.get_keyboard()) 
+            bot.register_next_step_handler(message, func, player_info)         
     else:
         output=BotValueError.process()
         bot.send_message(chat_id=message.chat.id, text=output)
 
-
-@bot.message_handler(content_types=['text'])
-def func(message):
+def func(message,player_info):
     if(message.text == "Подтвердить"):
-        #db_delete_player(db_session,player_info)
+        db_delete_player(db_session,player_info)
         bot.send_message(message.chat.id, text=f"Игрок удалён")
+        delete_player_pt1(message)
     elif(message.text == "Отменить"):
         bot.send_message(message.chat.id, text="Удаление отменено")
+        delete_player_pt1(message)
 
 
 """
@@ -729,16 +744,35 @@ def type_game_link(message,info):
 
     link = message.text
     info.append(link)
+    bot.send_message(chat_id=message.chat.id,text="Проверьте данные:")
+    check_game_mailing(message, info)
+
+def check_game_mailing(message, info):
+    buttons_list = ['Подтвердить', 'Отменить']
+    keyboard = Keyboard(buttons_list)
 
     str_game=f'Время игры:{info[0]} {info[1]}\nАдрес:{info[2]}\nОпрос:{info[3]}'
+    info.append(str_game)
+    bot.send_message(chat_id=message.chat.id,text=str_game,reply_markup=keyboard.get_keyboard())
 
+    bot.register_next_step_handler(message, confirm_game_mailing ,info)
+
+def confirm_game_mailing(message,info):
+    command=message.text
+    if command =="Подтвердить":
+        send_mailing(info)
+        mailing_variants(message)
+    if command =="Отменить":
+        mailing_variants(message)
+
+def send_mailing(info):
     for user_number in range(len(TEST_ID)):
+        text=info[4]
         chat_id = TEST_ID[user_number]
-        bot.send_message (text = str_game, chat_id = chat_id)
+        bot.send_message (text = text, chat_id = chat_id)
 
 @bot.message_handler(func=lambda message: message.text=='Тренировка')
 def prepair_training_mailing(message):
-
     bot.send_message(chat_id=message.chat.id, text='Введите день')
 
     info=[]
@@ -769,53 +803,26 @@ def type_training_link(message,info):
 
     link = message.text
     info.append(link)
+    bot.send_message(chat_id=message.chat.id,text="Проверьте данные:")
+    check_train_mailing(message, info)
+
+def check_train_mailing(message, info):
+    buttons_list = ['Подтвердить', 'Отменить']
+    keyboard = Keyboard(buttons_list)
 
     str_training=f'Время тренировки:{info[0]} {info[1]}\nАдрес:{info[2]}\nОпрос:{info[3]}'
+    info.append(str_training)
+    bot.send_message(chat_id=message.chat.id,text=str_training,reply_markup=keyboard.get_keyboard())
 
-    for user_number in range(len(TEST_ID)):
-        chat_id = TEST_ID[user_number]
-        bot.send_message (text = str_training, chat_id = chat_id)
+    bot.register_next_step_handler(message, confirm_training_mailing ,info)
 
-#сразу выполняется
-"""
-Заготовка под рассылку по времени
-
-def type_link(message,info):
-
-    link = message.text
-    info.append(link)
-    buttons_list = ['Вернуться']
-    work_keyboard = Keyboard(buttons_list)
-
-    text, link = info[0],info[1]
-    str = f'Проверьте данные:\nТекст:"{text}"\nСсылка:"{link}"'
-
-
-    bot.send_message(chat_id=message.chat.id, text=str)
-    bot.send_message(chat_id=message.chat.id, text='Введите время рассылки')
-    bot.register_next_step_handler(message, type_date, info, str)
-def type_date(message,info,chat_id):
-    #считать время из сообщения, проверить на адекватность (если сегодня раньше текущего момента- идёт нахуй, ночное тоже исключим: 00:00-6:00)
-    date=message.text
-    time=f"{date}"
-    date=datetime.datetime.strptime(message.text, '%H:%M').time()
-
-    info.append(date)
-    date=info[2]
-    print(date)
-
-    str=f'{info[0]}\n{info[1]}'
-
-    for user_number in range(len(PLAYERS_ID_LIST)):
-        chat_id = PLAYERS_ID_LIST[user_number]
-        #bot.send_message (text = str, chat_id = chat_id)
-        schedule.every().day.at(time).do(bot.send_message (text = str, chat_id = chat_id))
-
-"""
-
-"""
-    #добавить меню с вариантами: свой вариант, сейчас, через полчаса, через час, утром(8:00), днём(14:00), вечером(18:00), завтра утром(8:00), завтра днём(14:00), завтра вечером(18:00)
-"""
+def confirm_training_mailing(message,info):
+    command=message.text
+    if command =="Подтвердить":
+        send_mailing(info)
+        mailing_variants(message)
+    if command =="Отменить":
+        mailing_variants(message)
 
 @bot.message_handler(func=lambda message: message.text=='Объявление')
 def prepair_advertisement(message):
@@ -834,7 +841,7 @@ def type_advertisement(message):
     for user_number in range(len(TEST_ID)):
         chat_id = TEST_ID[user_number]
         bot.send_message (text = text, chat_id = chat_id)
-
+    mailing_variants(message)
 
 """
 -------------------------------------------------   редактировать профиль игрока(вставляет ссылку на вк)    ---------------------------------------
@@ -852,18 +859,32 @@ def choose_player(message):
 
 def type_number(message):
     number=message.text
-
+    player_info=[]
+    player_info.append(number)
     if IntValidator.validateValue(number) == True:
-
-        number=int(number)
-        player_info=[]
-        player_info.append(number)
-
-        bot.send_message(chat_id=message.chat.id, text='Введите ссылку на профиль в Вконтакте')
-        bot.register_next_step_handler(message, type_vk_id,player_info)
+        if check_number(db_session,player_info)!=False:
+            if chech_vk_id(db_session,player_info)==False:
+                name=check_number(db_session, player_info)
+                bot.send_message(chat_id=message.chat.id, text=f'Введите ссылку на профиль игрока {name} в соц.сети Вконтакте')
+                bot.register_next_step_handler(message, type_vk_id,player_info)
+            else:
+                buttons_list = ['Да', 'Нет']
+                keyboard = Keyboard(buttons_list)
+                bot.send_message(chat_id=message.chat.id, text=f'Ссылка на профиль уже сохранена. Хотите изменить?',reply_markup=keyboard.get_keyboard())
+                bot.register_next_step_handler(message, edit_profile, player_info)
+        else:
+            bot.send_message(chat_id=message.chat.id, text='Игрока с таким номером не существует')
     else:
         output=BotValueError.process()
         return(output)
+
+def edit_profile(message,player_info):
+    command=message.text
+    if command =="Да":
+        type_vk_id(db_session,player_info)
+        bot.send_message(chat_id=message.chat.id, text="Профиль отредактирован")
+    if command =="Нет":
+        choose_player(message)
 
 def type_vk_id(message, player_info):
     vk_id=message.text

@@ -143,6 +143,19 @@ def db_insert_vk_id(conn,player_info):
     vk_id= player_info[1]
     sql=f"update players set vk_id='{vk_id}' where number={number}"
     conn.execute(sql)
+    result=conn.fetch_all()
+def chech_vk_id(conn, player_info):
+    number= player_info[0]
+    sql=f"select vk_id from players where number={number}"
+    conn.execute(sql)
+    list=[]
+    result=conn.fetch_all()
+    for row in result:
+        list.append(row)
+    if not list:
+        return False
+    else:
+        return True
 
 def db_feedback_insert(conn,info):
     tg_id=info[0]
@@ -160,7 +173,7 @@ def db_feedback_check(conn):
     return(arr)
 
 def check_number(conn,player_info):
-    number=player_info[1]
+    number=player_info[0]
     sql=f"select name from players where number={number}"
     conn.execute(sql)
     list=[]
