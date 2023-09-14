@@ -224,3 +224,40 @@ def change_stat_team_alltime(conn, game_info):
     rc=game_info[7]
     sql=f"update team_stat_all_time set games = games + 1, wins=wins +{wins}, loses= loses+ {loses}, draws = draws+{draws}, goals_scored= goals_scored+ {gs}, goals_conceded=goals_conceded + {gc}, yellow_cards= yellow_cards + {yc}, red_cards= red_cards+ {rc}"
     conn.execute(sql)
+
+# системный запрос
+def sys_create_session(conn,tg_id,initial = False):
+    sys_set_user_tree(conn,tg_id,[],initial = False)
+
+def sys_del_session(conn,tg_id): # непонятно, когда вызывать. todo как понять, что юзер ушел?
+    sql = "DELETE FROM botsessions.sessions WHERE s.tg_id='{0}'".format(tg_id)
+    conn.execute(sql)
+
+def sys_get_user_tree(conn,tg_id):
+    sql = "SELECT tree FROM botsessions.sessions s WHERE s.tg_id='{0}'".format(tg_id)
+    conn.execute(sql)
+    print(conn.fetch_next())
+    user_tree = conn.fetch_next()
+    if user_tree == None:
+        return []
+    else:
+        r = []
+        map(lambda x: r.append(x),user_tree.split(','))
+        return r
+
+# системный запрос
+def sys_set_user_tree(conn, tg_id, new_tree:list,initial = False):
+    if initial:
+        sql = "INSERT INTO botsessions.sessions (tg_id,tree) VALUES ({0},NULL)".format(tg_id)
+        conn.execute(sql)
+        return None
+    in_tree = ''
+
+    for i,el in enumerate(new_tree):
+        if i != new_tree.__len__()-1:
+            in_tree+=el+','
+        else:
+            in_tree+=el
+
+    sql = "UPDATE botsessions.sessions s SET tree='{0}' WHERE s.tg_id = {1}".format(in_tree,tg_id)
+    conn.execute(sql)

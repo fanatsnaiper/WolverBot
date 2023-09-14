@@ -19,8 +19,8 @@ def send_start(message,initial = True ):
                 bot.reply_to(message, f'Привет, для доступа обратись к админам команды')
     
     if message.chat.id in ADMINS_ID_LIST:
-        user=User(message)
         if initial ==True:
+            user = User(message)
             bot.send_message(chat_id=message.chat.id,text=f'Привет, {user.name}!')
 
         buttons_list = ['Моя статистика','Команда','Управление командой']
@@ -29,9 +29,8 @@ def send_start(message,initial = True ):
         #bot.send_photo(chat_id=message.chat.id,photo=InputFile(MAIN_PHOTO))
         bot.send_message(chat_id=message.chat.id, text='Главное меню', reply_markup=menu_keyboard.get_keyboard())
     else:
-        user = User(message)
         if initial == True:
-
+            user = User(message)
             bot.send_message(chat_id=message.chat.id,text=f'Привет, {user.name}!')
 
         buttons_list = ['Моя статистика','Команда', 'Обратная связь']
@@ -41,6 +40,10 @@ def send_start(message,initial = True ):
 
 @bot.message_handler(func=lambda message: message.text == 'Вернуться')
 def cancel(message):
+
+    tg_id = message.chat.id
+    TREE = get_user_tree(tg_id)
+
     print(TREE)
     try:
         TREE.pop(-1)
@@ -76,7 +79,10 @@ def cancel(message):
 @bot.message_handler(func=lambda message: message.text=='Обратная связь')
 def send_feedback(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Вернуться']
     my_stat_keyboard = Keyboard(buttons_list)
@@ -115,7 +121,10 @@ def type_feedback(message,info):
 @bot.message_handler(func=lambda message: message.text=='Моя статистика')
 def send_my_stat(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Моя статистика по сезонам', 'Моя статистика за всё время','Вернуться']
     my_stat_keyboard = Keyboard(buttons_list)
@@ -134,7 +143,10 @@ def send_my_all_time_stat(message):
 @bot.message_handler(func=lambda message: message.text=='Моя статистика по сезонам')
 def send_my_by_season_stat(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Моя статистика за сезон 2022', 'Моя статистика за текущий сезон','Вернуться']
     my_by_season_stat_keyboard = Keyboard(buttons_list)
@@ -165,7 +177,10 @@ def send_my_season_2022_stat(message):
 @bot.message_handler(func=lambda message: message.text=='Команда')
 def send_team(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Турнирные таблицы', 'Список игроков','Статистика команды', 'Статистика игроков', 'Вернуться']
     stat_keyboard = Keyboard(buttons_list)
@@ -194,7 +209,10 @@ def send_players_list(message):
 @bot.message_handler(func=lambda message: message.text=='Статистика команды')
 def send_team_stat(message):
     if message.text !='Вернуться':
-        TREE.append(message.text) 
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
+        TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Статистика команды по сезонам', 'Статистика команды за всё время','Вернуться']
     stat_keyboard = Keyboard(buttons_list)
@@ -209,7 +227,10 @@ def send_team_all_time_stat(message):
 @bot.message_handler(func=lambda message: message.text=='Статистика команды по сезонам')
 def send_team_by_season_stat(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Статистика команды за сезон 2022', 'Статистика команды за текущий сезон', 'Вернуться']
     team_by_season_keyboard = Keyboard(buttons_list)
@@ -231,7 +252,10 @@ def send_team_season_2023_stat(message):
 @bot.message_handler(func=lambda message: message.text=='Статистика игроков')
 def send_players_list(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     markup = types.InlineKeyboardMarkup()
     btn1=types.InlineKeyboardButton(text="Павловичев Кирилл", callback_data="1")
@@ -496,7 +520,10 @@ def callback_inline(call):
 @bot.message_handler(func=lambda message: message.text=='Управление командой')
 def team_management(message):
     if message.text !='Вернуться':
-        TREE.append(message.text) # добавляем родительский раздел, чтобы понять, какую статистику выдать
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
+        TREE.append(message.text)
+        set_user_tree(tg_id, TREE) # добавляем родительский раздел, чтобы понять, какую статистику выдать
 
     buttons_list = ['Результат матча','Подготовить рассылку','Изменить состав команды', 'Редактировать профиль игрока', 'Вернуться']
     team_management_keyboard = Keyboard(buttons_list)
@@ -505,7 +532,10 @@ def team_management(message):
 @bot.message_handler(func=lambda message: message.text=='Результат матча')
 def game_result(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     game_info=[]
     bot.send_message(chat_id=message.chat.id, text='Счёт игры (забито : пропущено):')
@@ -606,7 +636,10 @@ def team_stat_pt4(message,game_info):
 @bot.message_handler(func=lambda message: message.text=='Изменить состав команды')
 def add_delete_player(message):
     if message.text !='Вернуться':
-        TREE.append(message.text) # добавляем родительский раздел, чтобы понять, какую статистику выдать
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
+        TREE.append(message.text)
+        set_user_tree(tg_id, TREE) # добавляем родительский раздел, чтобы понять, какую статистику выдать
 
     buttons_list = ['Добавить игрока', 'Удалить игрока', 'Вернуться']
     add_new_player_keyboard = Keyboard(buttons_list)
@@ -704,7 +737,10 @@ def func(message,player_info):
 @bot.message_handler(func=lambda message: message.text=='Подготовить рассылку')
 def mailing_variants(message):
     if message.text !='Вернуться':
+        tg_id = message.chat.id
+        TREE = get_user_tree(tg_id)
         TREE.append(message.text)
+        set_user_tree(tg_id, TREE)
 
     buttons_list = ['Игра','Тренировка', 'Объявление', 'Вернуться']
     add_new_player_keyboard = Keyboard(buttons_list)

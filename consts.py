@@ -74,5 +74,14 @@ class Keyboard:
 class User:
     def __init__(self, message):
         self.tg_id = int(message.chat.id)
-
+        sys_create_session(db_session, self.tg_id, initial=True) # мб имеет смысл эту строчку двинуть в конец метода
         self.name = get_player_name(db_session,self.tg_id)
+
+def get_user_tree(tg_id):
+    return sys_get_user_tree(db_session,tg_id)
+
+def set_user_tree(tg_id, TREE):
+    sys_set_user_tree(db_session, tg_id,TREE)
+
+def delete_user_session(tg_id):
+    sys_del_session(db_session,tg_id)
