@@ -1,13 +1,18 @@
 from conn import *
 from engine.botError import *
 
+
+
+"""
+-------------------------------------Запрос для инициализации--------------------------------
+"""
 def get_player_name(conn,tg_id) -> int:
     sql = f'select name from players where tg_id={tg_id}'
     conn.execute(sql)
     player_name = conn.fetch_next()
     return player_name[0].split(' ')[1]
 
-def get_player_number(conn,tg_id):
+def get_player_number(conn,tg_id):#нигде не используется
     sql = f'select number from players where tg_id={tg_id}'
     conn.execute(sql)
     number =''
@@ -15,6 +20,10 @@ def get_player_number(conn,tg_id):
     for row in result:
         number=row
     return(number)
+
+"""
+
+"""
 
 def get_player_tg(conn, player_info):
     name=player_info[0]
@@ -38,6 +47,10 @@ def db_players_list(conn):
         output+= f'{list[i][1]}\nНомер: {list[i][0]}\n{list[i][2]}\n\n'  
 
     return(output)
+
+"""
+---------------------------------------------------------Запрос статистики--------------------------------------------------------
+"""
 
 def db_player_all_time_stat(conn,player_info):
     tg_id=player_info[0]
@@ -126,27 +139,14 @@ def db_team_season_2023_stat(conn):
 
     return(output)
 
-def db_insert_player(conn,player_info):
-    number=player_info[1]
-    name= player_info[0]
-    tg_id=player_info[2]
-    sql=f"insert into players (number, name, tg_id) values({number}, '{name}', {tg_id})"
-    conn.execute(sql)
 
-def db_delete_player(conn, player_info):
+"""
+--------------------------------------------------Проверка наличия информации-----------------------------------------------------------
+(есть - True, нет - False)
+"""
+def check_number(conn,player_info):
     number=player_info[0]
-    sql=f"delete from players where number={number}"
-    conn.execute(sql)
-
-def db_insert_vk_id(conn,player_info):
-    number= player_info[0]
-    vk_id= player_info[1]
-    sql=f"update players set vk_id='{vk_id}' where number={number}"
-    conn.execute(sql)
-    result=conn.fetch_all()
-def chech_vk_id(conn, player_info):
-    number= player_info[0]
-    sql=f"select vk_id from players where number={number}"
+    sql=f"select number from players where number={number}"
     conn.execute(sql)
     list=[]
     result=conn.fetch_all()
@@ -156,40 +156,9 @@ def chech_vk_id(conn, player_info):
         return False
     else:
         return True
-
-def db_feedback_insert(conn,info):
-    tg_id=info[0]
-    text=info[1]
-    sql=f"insert into feedback values((select number from players where tg_id={tg_id}), '{text}') "
-    conn.execute(sql)
-
-def db_feedback_check(conn):
-    sql="select p.name, f.text from feedback f join players p on p.number=f.number"
-    conn.execute(sql)
-    arr=[]
-    result=conn.fetch_all()
-    for row in result:
-        arr.append(row)
-    return(arr)
-
-def check_number(conn,player_info):
-    number=player_info[0]
-    sql=f"select name from players where number={number}"
-    conn.execute(sql)
-    list=[]
-    result=conn.fetch_all()
-    for row in result:
-        list.append(row)
-    if not list:
-        return False
-    else:
-        output=""
-        for i in range(0,len(list)):
-            output+=f'{list[i]}'
-        return (output)
     
 def check_name(conn,player_info):
-    name=player_info[0]
+    name=player_info[1]
     sql=f"select number from players where name='{name}'"
     conn.execute(sql)
     list=[]
@@ -214,7 +183,24 @@ def check_tg_id(conn,player_info):
     else:
         return True
 
-def change_stat_team_alltime(conn, game_info):
+def check_vk_id(conn, player_info):
+    number= player_info[0]
+    sql=f"select vk_id from players where number={number}"
+    conn.execute(sql)
+    list=[]
+    result=conn.fetch_all()
+    for row in result:
+        list.append(row)
+    if not list:
+        return False
+    else:
+        return True
+
+
+"""
+----------------------------------------------------Изменения в БД----------------------------------------------
+"""
+def insert_game_result(conn, game_info):
     wins= game_info[1]
     loses = game_info[2]
     draws = game_info[3]
@@ -223,4 +209,46 @@ def change_stat_team_alltime(conn, game_info):
     yc=game_info[6]
     rc=game_info[7]
     sql=f"update team_stat_all_time set games = games + 1, wins=wins +{wins}, loses= loses+ {loses}, draws = draws+{draws}, goals_scored= goals_scored+ {gs}, goals_conceded=goals_conceded + {gc}, yellow_cards= yellow_cards + {yc}, red_cards= red_cards+ {rc}"
+    sql1=f"update team_stat_season_2023 set games = games + 1, wins=wins +{wins}, loses= loses+ {loses}, draws = draws+{draws}, goals_scored= goals_scored+ {gs}, goals_conceded=goals_conceded + {gc}, yellow_cards= yellow_cards + {yc}, red_cards= red_cards+ {rc}"
     conn.execute(sql)
+    conn.execute(sql1)
+
+def db_insert_player(conn,player_info):
+    number=player_info[0]
+    name= player_info[1]
+    tg_id=player_info[2]
+    vk_id=player_info[3]
+    sql=f"insert into players (number, name, tg_id, vk_id) values({number}, '{name}', {tg_id}, '{vk_id}') "
+    sql1=f"insert into players_stat_all_time (number) values({number})"
+    sql2=f"insert into players_stat_season_2022 (number) values({number})"
+    sql3=f"insert into players_stat_season_2023 (number) values({number})"
+    conn.execute(sql)
+    conn.execute(sql1)
+    conn.execute(sql2)
+    conn.execute(sql3)
+
+def db_delete_player(conn, player_info):
+    number=player_info[0]
+    sql=f"delete from players where number={number}"
+    conn.execute(sql)
+
+def db_insert_vk_id(conn,player_info):
+    number= player_info[0]
+    vk_id= player_info[1]
+    sql=f"update players set vk_id='{vk_id}' where number={number}"
+    conn.execute(sql)
+    result=conn.fetch_all()
+    return (result)
+
+"""
+---------------------------------------------
+"""
+def get_name_by_number(conn,player_info):
+    number=player_info[0]
+    sql=f"select name form players where number={number}"
+    conn.execute(sql)
+    list=[]
+    result=conn.fetch_all()
+    for row in result:
+        list.append(row)
+    return (list)

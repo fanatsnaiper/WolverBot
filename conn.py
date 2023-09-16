@@ -12,7 +12,7 @@ class Conn:
 
     def execute(self,sql):
         if self.type == 'MS':
-            self.crs.execute(sql)
+                self.crs.execute(sql)
     def fetch_next(self):
         if self.type == 'MS':
             return self.crs.fetchone()
