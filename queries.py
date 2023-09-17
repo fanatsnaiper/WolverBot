@@ -200,7 +200,22 @@ def check_vk_id(conn, player_info):
 """
 ----------------------------------------------------Изменения в БД----------------------------------------------
 """
-def insert_game_result(conn, game_info):
+def insert_game_result_player(conn, game_info):
+    player_info=game_info[8]
+    sql_arr=[]
+    for i in range(0,len(player_info)):
+        name=player_info[i].split(":")[0]
+        goals=player_info[i].split(":")[1]
+        assists=player_info[i].split(":")[2]
+        yc=player_info[i].split(":")[3]
+        rc=player_info[i].split(":")[4]
+        sql=f"update players_stat_all_time set games=games+1, goals=goals+{goals}, assists=assists+{assists}, yellow_cards=yellow_cards+{yc}, red_cards=red_cards+{rc} where number=(select number from players where name='{name}')"
+        sql_arr.append(sql)
+    for i in range(0,len(sql_arr)):
+        sql=sql_arr[i]
+        conn.execute(sql)
+
+def insert_game_result_team(conn, game_info):
     wins= game_info[1]
     loses = game_info[2]
     draws = game_info[3]

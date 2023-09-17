@@ -538,7 +538,7 @@ def team_stat_pt3(message, game_info):
 def team_stat_pt4(message,game_info):
     command=message.text
     if command =="Подтвердить":
-        insert_game_result(db_session, game_info)
+        insert_game_result_team(db_session, game_info)
         bot.send_message(chat_id=message.chat.id, text="Статистика изменена")
         print(game_info[1])
     if command =="Отменить":
