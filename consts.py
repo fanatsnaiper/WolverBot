@@ -5,7 +5,6 @@ from telebot.types import KeyboardButton, InputFile
 from queries import *
 import os, json, requests
 
-
 def get_token():
     with open('files/token.txt') as f:
         return f.readline()

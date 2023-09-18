@@ -193,9 +193,9 @@ def send_team_season_2023_stat(message):
 def send_players_list(message):
     if message.text !='Вернуться':
         TREE.append(message.text)
-
+    i='1'
     markup = types.InlineKeyboardMarkup()
-    btn1=types.InlineKeyboardButton(text="Павловичев Кирилл", callback_data="1")
+    btn1=types.InlineKeyboardButton(text="Павловичев Кирилл", callback_data=i)
     btn2=types.InlineKeyboardButton(text="Серов Егор", callback_data="2")
     btn3=types.InlineKeyboardButton(text="Мельников Глеб", callback_data="3")
     btn4=types.InlineKeyboardButton(text="Светлаков Лев", callback_data="4")
@@ -219,9 +219,10 @@ def send_players_list(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
+    i='1'
     if call.message:
         player_info=[]
-        if call.data == "1":
+        if call.data == i:
             name="Павловичев Кирилл"
             player_info.append(name)
             tg_id=get_player_tg(db_session,player_info)

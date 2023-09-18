@@ -35,6 +35,15 @@ def get_player_tg(conn, player_info):
         tg_id=row
     return(tg_id)
 
+def get_names_and_numbers(conn):
+    sql='select number, name from players'
+    conn.execute(sql)
+    result=conn.fetch_all()
+    list=[]
+    for row in result:
+        list.append(row)
+    return(list)
+
 def db_players_list(conn):
     sql="select number, name, vk_id from players"
     conn.execute(sql)
@@ -45,7 +54,6 @@ def db_players_list(conn):
         list.append(row)
     for i in range(0,len(list)):
         output+= f'{list[i][1]}\nНомер: {list[i][0]}\n{list[i][2]}\n\n'  
-
     return(output)
 
 """
@@ -260,10 +268,7 @@ def db_insert_vk_id(conn,player_info):
 """
 def get_name_by_number(conn,player_info):
     number=player_info[0]
-    sql=f"select name form players where number={number}"
+    sql=f"select name from players where number={number}"
     conn.execute(sql)
-    list=[]
-    result=conn.fetch_all()
-    for row in result:
-        list.append(row)
-    return (list)
+    result=conn.fetch_next()
+    return (result)

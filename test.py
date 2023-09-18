@@ -219,7 +219,43 @@ def team_stat_season_2022(message):
 СТАТИСТИКА ИГРОКОВ
 """
 def players_stat(message):
-    pass
+    list=get_names_and_numbers(db_session)
+    print(list)
+    buttons_list=[]
+    for i in range(0,len(list)):
+            name=list[i][1]
+            buttons_list.append(name)
+    keyboard = Keyboard(buttons_list)
+    bot.send_message(chat_id=message.chat.id, text='Выберите игрока', reply_markup=keyboard.get_keyboard())
+    bot.register_next_step_handler(message, players_stat_sub, list)
+
+def players_stat_sub(message,list):
+    player_info=[]
+    for i in range(0,len(list)):
+       name=list[i][1]
+       if message.text== name:
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info[0]=tg_id
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=message.chat.id, text=f"За сезон 2023:\n"+output)
+    
+    print(list)
+"""
+def players_stat(message):
+    for i in range(get_numbers(db_session)):
+        player_info=[]
+        player_info.append(i)
+        name=get_name_by_number(db_session,player_info)
+        markup = types.InlineKeyboardMarkup()
+        btn=types.InlineKeyboardButton(text=name, callback_data=i)
+        markup.add(btn)
+    bot.send_message(chat_id=message.chat.id, text="Выберите игрока",reply_markup=markup)  
+"""
 """
 ------------------------------------------УПРАВЛЕНИЕ КОМАНДОЙ---------------------------------
 """
@@ -250,7 +286,7 @@ def edit_profile(message):
 
     bot.send_message(chat_id=message.chat.id, text='Введите номер игрока', reply_markup=keyboard.get_keyboard())
     bot.register_next_step_handler(message,type_number)
-    
+
 def type_number(message):
     number=message.text
     player_info=[]
