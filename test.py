@@ -225,11 +225,15 @@ def players_stat(message):
     for i in range(0,len(list)):
             name=list[i][1]
             buttons_list.append(name)
+    back="Вернуться"
+    buttons_list.append(back)
     keyboard = Keyboard(buttons_list)
     bot.send_message(chat_id=message.chat.id, text='Выберите игрока', reply_markup=keyboard.get_keyboard())
     bot.register_next_step_handler(message, players_stat_sub, list)
 
 def players_stat_sub(message,list):
+    if message.text=="Вернуться":
+        TEAM(message)
     player_info=[]
     for i in range(0,len(list)):
        name=list[i][1]
@@ -243,19 +247,7 @@ def players_stat_sub(message,list):
             bot.send_message(chat_id=message.chat.id, text=f"За сезон 2022:\n"+output)
             output= db_player_season_2023_stat(db_session, player_info)
             bot.send_message(chat_id=message.chat.id, text=f"За сезон 2023:\n"+output)
-    
-    print(list)
-"""
-def players_stat(message):
-    for i in range(get_numbers(db_session)):
-        player_info=[]
-        player_info.append(i)
-        name=get_name_by_number(db_session,player_info)
-        markup = types.InlineKeyboardMarkup()
-        btn=types.InlineKeyboardButton(text=name, callback_data=i)
-        markup.add(btn)
-    bot.send_message(chat_id=message.chat.id, text="Выберите игрока",reply_markup=markup)  
-"""
+
 """
 ------------------------------------------УПРАВЛЕНИЕ КОМАНДОЙ---------------------------------
 """
