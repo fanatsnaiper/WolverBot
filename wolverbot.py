@@ -1,4 +1,3 @@
-#from handler import *
 from consts import *
 from test import *
 
