@@ -4,7 +4,8 @@ from engine.valid import *
 import telebot
 from telebot import types
 import os.path
-
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+"""
 def send_bot_restart():
     text="Для возобновления работы с ботом нажмите:"
     for user in ADMINS_ID_LIST:
@@ -13,7 +14,7 @@ def send_bot_restart():
         bot.send_message(text = text, chat_id = user, reply_markup=restart_keyboard.get_keyboard())
 
 send_bot_restart()
-
+"""
 @bot.message_handler(commands=['start'])
 def send_start(message,initial = True ):
     """ Начало взаимодействия с ботом
@@ -243,15 +244,49 @@ def team_stat_season_2022(message):
 """
 def players_stat(message):
     list=get_names_and_numbers(db_session)
+    markup = types.InlineKeyboardMarkup()
+    #markup.row()счётчик для расположения кнопок по рядам (по три в ряд)
     buttons_list=[]
     for i in range(0,len(list)):
-            name=list[i][1]
-            buttons_list.append(name)
-    back="Назад"
-    buttons_list.append(back)
-    keyboard = Keyboard(buttons_list)
-    bot.send_message(chat_id=message.chat.id, text='Выберите игрока', reply_markup=keyboard.get_keyboard())
-    bot.register_next_step_handler(message, players_stat_sub, list)
+        name=list[i][1]
+        number=list[i][0]
+        btn=types.InlineKeyboardButton(text=f"{name}", callback_data=f"{number}")
+        buttons_list.append(btn)
+        #markup.add(btn) 
+        #buttons_list.append(name) 
+    #markup.add(buttons_list)
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons_list)
+    btn=types.InlineKeyboardButton(text="Назад", callback_data="back")
+    markup.add(btn)
+    #back="Назад"
+    #buttons_list.append(back)
+    #keyboard = Keyboard(buttons_list)
+    #bot.send_message(chat_id=message.chat.id, text='Выберите игрока', reply_markup=keyboard.get_keyboard())
+    bot.send_message(chat_id=message.chat.id, text='Выберите игрока', reply_markup=markup)
+    #bot.register_next_step_handler(message, players_stat_sub, list)
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    list=get_names_and_numbers(db_session)
+    if call.message:
+        if call.data=="back":
+            pass
+        else:
+            for i in range(0,len(list)):
+                name=list[i][1]
+                number=list[i][0]
+                player_info=[]
+                if call.data == f"{number}":
+                    player_info.append(name)
+                    tg_id=get_player_tg(db_session,player_info)
+                    player_info[0]=tg_id
+                    output= db_player_all_time_stat(db_session, player_info)
+                    bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+                    output= db_player_season_2022_stat(db_session, player_info)
+                    bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+                    output= db_player_season_2023_stat(db_session, player_info)
+                    bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
 
 def players_stat_sub(message,list):
     if message.text=="Назад":
