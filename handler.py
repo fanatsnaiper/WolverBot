@@ -5,14 +5,14 @@ import telebot
 from telebot import types
 import os.path
 
-def send_message():
+def send_bot_restart():
     text="Для возобновления работы с ботом нажмите:"
     for user in ADMINS_ID_LIST:
         button_list=["/start"]
         restart_keyboard=Keyboard(button_list)
         bot.send_message(text = text, chat_id = user, reply_markup=restart_keyboard.get_keyboard())
 
-send_message()
+send_bot_restart()
 
 @bot.message_handler(commands=['start'])
 def send_start(message,initial = True ):
