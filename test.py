@@ -234,7 +234,6 @@ def team_stat_season_2022(message):
 """
 def players_stat(message):
     list=get_names_and_numbers(db_session)
-    print(list)
     buttons_list=[]
     for i in range(0,len(list)):
             name=list[i][1]
@@ -616,7 +615,6 @@ def team_stat_pt3(message,game_info):
             bot.send_message(chat_id=message.chat.id, text=output)
     game_info.append(personal_info)
     team_stat_pt4(message,game_info)
-    print(game_info)
     
 def team_stat_pt4(message, game_info):
     if game_info[0]=="поражение":
