@@ -31,12 +31,15 @@ def get_player_tg(conn, player_info):
     conn.execute(sql)
     tg_id =''
     result=conn.fetch_next()
-    for row in result:
-        tg_id=row
-    return(tg_id)
+    if not result:
+        tg_id=False
+    else:
+        for row in result:
+            tg_id=row
+        return(tg_id)
 
 def get_names_and_numbers(conn):
-    sql='select number, name from players'
+    sql='select number, name from players where tg_id is not null'
     conn.execute(sql)
     result=conn.fetch_all()
     list=[]
