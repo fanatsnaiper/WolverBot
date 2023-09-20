@@ -4,7 +4,13 @@ from engine.valid import *
 import telebot
 from telebot import types
 import os.path
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+# from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from consts import EmptyMessage
+
+def EMPTY(*args):
+    tg_id = args[0]
+    return EmptyMessage(tg_id)
+
 """
 def send_bot_restart():
     text="Для возобновления работы с ботом нажмите:"
@@ -23,17 +29,17 @@ def send_start(message,initial = True ):
     """
 
 
-    if message.chat.id not in PLAYERS_ID_LIST: 
+    if message.chat.id not in PLAYERS_ID_LIST:
         if message.chat.id not in ADMINS_ID_LIST :
             if initial == True:
                 bot.reply_to(message, f'Привет, для доступа обратись к админам команды')
-    
+
         if message.chat.id in ADMINS_ID_LIST:
             user=User(message)
             if initial ==True:
                 bot.send_message(chat_id=message.chat.id,text=f'Привет, {user.name}!')
             MAIN_ADMIN(message)
-            """проверка на существование файла(если необходимо-создание файла)
+            """проверка на существование файла(если необходимо-создК"ание файла)
             логирование - вставлять название ветки меню каждый раз, когда в него переходят
             name=user.name
             log=open(f"{name}.txt")
@@ -133,7 +139,7 @@ def my_stat_current_season(message):
     tg_id=message.chat.id
     player_info=[]
     player_info.append(tg_id)
-    
+
     button_list=['Назад']
     current_season_keyboard=Keyboard(button_list)
     text=db_player_season_2023_stat(db_session,player_info)
@@ -144,7 +150,7 @@ def my_stat_season_2022(message):
     tg_id=message.chat.id
     player_info=[]
     player_info.append(tg_id)
-    
+
     button_list=['Назад']
     season_2022_keyboard=Keyboard(button_list)
     text=db_player_season_2023_stat(db_session,player_info)
@@ -155,7 +161,7 @@ def my_stat_all_time(message):
     tg_id=message.chat.id
     player_info=[]
     player_info.append(tg_id)
-    
+
     text = db_player_all_time_stat(db_session,player_info)
     bot.send_message(chat_id=message.chat.id, text=text)
     STAT(message)
@@ -169,7 +175,7 @@ def TEAM(message):
     bot.send_message(chat_id=message.chat.id, text='Выберите раздел', reply_markup=team_keyboard.get_keyboard())
     bot.register_next_step_handler(message, team_menu)
 
-def team_menu(message):
+def team_menu(message = None):
     if message.text=='Турнирные таблицы':
         tournament_table(message)
     if message.text=='Список игроков':
@@ -252,8 +258,8 @@ def players_stat(message):
         number=list[i][0]
         btn=types.InlineKeyboardButton(text=f"{name}", callback_data=f"{number}")
         buttons_list.append(btn)
-        #markup.add(btn) 
-        #buttons_list.append(name) 
+        #markup.add(btn)
+        #buttons_list.append(name)
     #markup.add(buttons_list)
     markup = types.InlineKeyboardMarkup()
     markup.add(*buttons_list)
@@ -269,9 +275,10 @@ def players_stat(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     list=get_names_and_numbers(db_session)
+    empty_message = EMPTY(call.message.chat.id)
     if call.message:
         if call.data=="back":
-            pass
+            TEAM(empty_message)
         else:
             for i in range(0,len(list)):
                 name=list[i][1]
@@ -287,6 +294,8 @@ def callback_inline(call):
                     bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
                     output= db_player_season_2023_stat(db_session, player_info)
                     bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+                    TEAM(empty_message)
+                    break
 
 def players_stat_sub(message,list):
     if message.text=="Назад":
@@ -386,7 +395,7 @@ def type_vk_id(message, player_info):
     bot.register_next_step_handler(message, confirm_edit, player_info)
 """
 ИЗМЕНИТЬ СОСТАВ КОМАНДЫ
-"""        
+"""
 def change_squad_list(message):
     buttons_list = ['Добавить игрока', 'Удалить игрока', 'Назад']
     change_squad_list_keyboard = Keyboard(buttons_list)
@@ -399,7 +408,7 @@ def change_squad_list_menu(message):
     if message.text=='Удалить игрока':
         delete_player_pt1(message)
     if message.text=='Назад':
-        TEAM_MANAGEMENT(message)       
+        TEAM_MANAGEMENT(message)
 """
 ДОБАВИТЬ ИГРОКА
 """
@@ -444,7 +453,7 @@ def type_info(message,player_info):
                                         bot.send_message(chat_id=message.chat.id,text='Игрок с таким telegram_id уже есть в таблице')
                                 else:
                                     output=BotValueError.process()
-                                    bot.send_message(chat_id=message.chat.id, text=output)                 
+                                    bot.send_message(chat_id=message.chat.id, text=output)
                             else:
                                 bot.send_message(chat_id=message.chat.id,text='Игрок с таким именем уже есть в таблице')
                         else:
@@ -480,7 +489,7 @@ def type_info(message,player_info):
                                         bot.send_message(chat_id=message.chat.id,text='Игрок с таким telegram_id уже есть в таблице')
                                 else:
                                     output=BotValueError.process()
-                                    bot.send_message(chat_id=message.chat.id, text=output)                 
+                                    bot.send_message(chat_id=message.chat.id, text=output)
                             else:
                                 bot.send_message(chat_id=message.chat.id,text='Игрок с таким именем уже есть в таблице')
                         else:
@@ -498,7 +507,7 @@ def type_info(message,player_info):
             bot.send_message(chat_id=message.chat.id,text="Ошибки всегда поджидают, чтобы их допускали.")
 """
 УДАЛИТЬ ИГРОКА
-"""        
+"""
 def delete_player_pt1(message):
     button_list=['Назад']
     delete_player_keyboard=Keyboard(button_list)
@@ -523,8 +532,8 @@ def delete_player_pt2(message):
                 markup = ReplyKeyboardMarkup
                 button_list = ['Подтвердить', 'Отменить']
                 markup=Keyboard(button_list)
-                bot.send_message(chat_id=message.chat.id, text=f'Подтвердите удаление игрока\t{name}',reply_markup=markup.get_keyboard()) 
-                bot.register_next_step_handler(message, delete_player_confirm, player_info)         
+                bot.send_message(chat_id=message.chat.id, text=f'Подтвердите удаление игрока\t{name}',reply_markup=markup.get_keyboard())
+                bot.register_next_step_handler(message, delete_player_confirm, player_info)
         else:
             output=BotValueError.process()
             bot.send_message(chat_id=message.chat.id, text=output)
@@ -557,7 +566,7 @@ def team_stat_pt1(message,game_info):
             output=BotValueError.process()
             bot.send_message(chat_id=message.chat.id, text=output)
             game_result(message)
-        else:   
+        else:
             if IntValidator.validateValue(string.split(":")[0]) == True:
                 scored=string.split(":")[0]
                 if IntValidator.validateValue(string.split(":")[1]) == True:
@@ -644,13 +653,13 @@ def team_stat_pt3(message,game_info):
                                 bot.send_message(chat_id=message.chat.id, text=output)
                         else:
                             output=BotValueError.process()
-                            bot.send_message(chat_id=message.chat.id, text=output)                 
+                            bot.send_message(chat_id=message.chat.id, text=output)
                     else:
                         output=BotValueError.process()
-                        bot.send_message(chat_id=message.chat.id, text=output)               
+                        bot.send_message(chat_id=message.chat.id, text=output)
                 else:
                     output=BotValueError.process()
-                    bot.send_message(chat_id=message.chat.id, text=output)         
+                    bot.send_message(chat_id=message.chat.id, text=output)
             else:
                 output=BotValueError.process()
                 bot.send_message(chat_id=message.chat.id, text=output)
@@ -659,7 +668,7 @@ def team_stat_pt3(message,game_info):
             bot.send_message(chat_id=message.chat.id, text=output)
     game_info.append(personal_info)
     team_stat_pt4(message,game_info)
-    
+
 def team_stat_pt4(message, game_info):
     if game_info[0]=="поражение":
         text=f"Поражение\nЗабито: {game_info[4]}\nПропущено: {game_info[5]}\nЖёлтые карточки: {game_info[6]}\nКрасные карточки: {game_info[7]}\n\nЛичная статистика:\n{game_info[8]}"

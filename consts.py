@@ -75,3 +75,10 @@ class User:
         self.tg_id = int(message.chat.id)
 
         self.name = get_player_name(db_session,self.tg_id)
+
+class EmptyMessage():
+    def __init__(self,tg_id):
+        text = None
+        class Chat:
+            id = tg_id
+        self.chat = Chat()
