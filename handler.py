@@ -4,7 +4,12 @@ from engine.valid import *
 import telebot
 from telebot import types
 
-
+@bot.message_handler(commands=['restart'])
+def send_restart():
+    buttons_list=['/start']
+    restart_keyboard=Keyboard(buttons_list)
+    for user in ADMINS_ID_LIST:
+        bot.send_message(bot.send_message(chat_id=user,text='Для возобновления работы с ботом нажмите на кнопку стандартного меню'), reply_markup=restart_keyboard.get_keyboard())
 @bot.message_handler(commands=['start'])
 def send_start(message,initial = True ):
     """ Начало взаимодействия с ботом
