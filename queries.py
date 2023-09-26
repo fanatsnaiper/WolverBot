@@ -27,7 +27,7 @@ def get_player_number(conn,tg_id):#нигде не используется
 
 def get_player_tg(conn, player_info):
     name=player_info[0]
-    sql = f'select tg_id from players where name="{name}"'
+    sql = f"select tg_id from players where name='{name}'"
     conn.execute(sql)
     tg_id =''
     result=conn.fetch_next()
@@ -62,9 +62,9 @@ def db_players_list(conn):
 
 def db_player_all_time_stat(conn,player_info):
     tg_id=player_info[0]
-    sql=f"select games, goals, assists, yellow_cards, red_cards from players_stat_all_time psat join players p on p.number=psat.number where tg_id={tg_id}"
-    conn.execute(sql)
+    sql=f"select sum(games)as games , sum(goals)as goals,sum(assists)as assists, sum(yellow_cards)as yellow_cards, sum(red_cards) as red_cards from players_stat psat join players p on p.number=psat.number where tg_id={tg_id};"
     stat=[]
+    conn.execute(sql)
     result=conn.fetch_all()
     for row in result:
         stat.append(row)
@@ -77,7 +77,7 @@ def db_player_all_time_stat(conn,player_info):
 
 def db_player_season_2023_stat(conn,player_info):
     tg_id=player_info[0]
-    sql=f"select games, goals, assists, yellow_cards, red_cards from players_stat_season_2023 pss23 join players p on p.number=pss23.number where tg_id={tg_id}"    
+    sql=f"select games, goals, assists, yellow_cards, red_cards from players_stat pss23 join players p on p.number=pss23.number and pss23.season_year =2023 where tg_id={tg_id}"
     conn.execute(sql)
     stat=[]
     result=conn.fetch_all()
@@ -92,7 +92,7 @@ def db_player_season_2023_stat(conn,player_info):
 
 def db_player_season_2022_stat(conn,player_info):
     tg_id=player_info[0]
-    sql=f"select games, goals, assists, yellow_cards, red_cards from players_stat_season_2022 pss22 join players p on p.number=pss22.number where tg_id={tg_id}"
+    sql=f"select games, goals, assists, yellow_cards, red_cards from players_stat pss22 join players p on p.number=pss22.number and pss22.season_year =2022 where tg_id={tg_id}"
     conn.execute(sql)
     stat=[]
     result=conn.fetch_all()
@@ -106,7 +106,7 @@ def db_player_season_2022_stat(conn,player_info):
     return(output)
 
 def db_team_all_time_stat(conn):
-    sql="select * from team_stat_all_time"
+    sql="select sum(games),sum(wins),sum(loses),sum(draws),sum(goals_scored),sum(goals_conceded),sum(yellow_cards),sum(red_cards) from team_stat;"
     conn.execute(sql)
     team_stat=[]
     result=conn.fetch_all()
@@ -120,7 +120,7 @@ def db_team_all_time_stat(conn):
     return(output)
 
 def db_team_season_2022_stat(conn):
-    sql="select * from team_stat_season_2022"
+    sql="select * from team_stat where season_year=2022"
     conn.execute(sql)
     team_stat=[]
     result=conn.fetch_all()
@@ -134,7 +134,7 @@ def db_team_season_2022_stat(conn):
     return(output)
 
 def db_team_season_2023_stat(conn):
-    sql="select * from team_stat_season_2023"
+    sql="select * from team_stat where season_year=2023"
     conn.execute(sql)
     team_stat=[]
     result=conn.fetch_all()
@@ -217,7 +217,7 @@ def insert_game_result_player(conn, game_info):
         assists=player_info[i].split(":")[2]
         yc=player_info[i].split(":")[3]
         rc=player_info[i].split(":")[4]
-        sql=f"update players_stat_all_time set games=games+1, goals=goals+{goals}, assists=assists+{assists}, yellow_cards=yellow_cards+{yc}, red_cards=red_cards+{rc} where number=(select number from players where name='{name}')"
+        sql=f"update players_stat set games=games+1, goals=goals+{goals}, assists=assists+{assists}, yellow_cards=yellow_cards+{yc}, red_cards=red_cards+{rc} where number=(select number from players where name='{name}')"
         sql_arr.append(sql)
     for i in range(0,len(sql_arr)):
         sql=sql_arr[i]
@@ -241,14 +241,12 @@ def db_insert_player(conn,player_info):
     name= player_info[1]
     tg_id=player_info[2]
     vk_id=player_info[3]
-    sql=f"insert into players (number, name, tg_id, vk_id) values({number}, '{name}', {tg_id}, '{vk_id}') "
-    sql1=f"insert into players_stat_all_time (number) values({number})"
-    sql2=f"insert into players_stat_season_2022 (number) values({number})"
-    sql3=f"insert into players_stat_season_2023 (number) values({number})"
-    conn.execute(sql)
+    sql1=f"insert into players (number, name, tg_id, vk_id) values({number}, '{name}', {tg_id}, '{vk_id}') "
+    sql2=f"insert into players_stat (number) values({number})"
+
     conn.execute(sql1)
     conn.execute(sql2)
-    conn.execute(sql3)
+
 
 def db_delete_player(conn, player_info):
     number=player_info[0]
