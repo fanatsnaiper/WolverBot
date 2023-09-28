@@ -3,13 +3,14 @@ from engine.botError import *
 from engine.valid import *
 import telebot
 from telebot import types
+import os.path
 
 @bot.message_handler(commands=['restart'])
-def send_restart():
+def send_restart(message):
     buttons_list=['/start']
     restart_keyboard=Keyboard(buttons_list)
     for user in ADMINS_ID_LIST:
-        bot.send_message(bot.send_message(chat_id=user,text='Для возобновления работы с ботом нажмите на кнопку стандартного меню'), reply_markup=restart_keyboard.get_keyboard())
+        bot.send_message(chat_id=user,text='Для возобновления работы с ботом нажмите на кнопку стандартного меню', reply_markup=restart_keyboard.get_keyboard())
 @bot.message_handler(commands=['start'])
 def send_start(message,initial = True ):
     """ Начало взаимодействия с ботом
@@ -241,37 +242,111 @@ def players_stat(message):
 
 def players_stat_menu(message):
     if message.text=="Назад":
-        TEAM(message)
+        TEAM_MANAGEMENT(message)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
+    if call.data=="да":
+        confirm_lineup(call)
+        print("Прошло")
+    if call.data=="нет":#очищать файл и вызывать главное меню либо же добавить ещё одно промежуточное меню с выбором- добавить удалить игрока/покинуть меню 
+        print("Не прошло")
+        TEAM_MANAGEMENT(call.message)
+        open("lineup.txt", "w")
     list=get_names_and_numbers(db_session)
-    if call.message:
-        for i in range(0,len(list)):
-            name=list[i][1]
-            number=list[i][0]
-            player_info=[]
-            if call.data == f"{number}":
-                player_info.append(name)
-                tg_id=get_player_tg(db_session,player_info)
-                player_info[0]=tg_id
-                output= db_player_all_time_stat(db_session, player_info)
-                bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
-                output= db_player_season_2022_stat(db_session, player_info)
-                bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
-                output= db_player_season_2023_stat(db_session, player_info)
-                bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
-                break
+    name_list=[]
+    for i in range(0,len(list)):
+        name=list[i][1]
+        number=list[i][0]
+        name_list.append(name)
+        player_info=[]
+        if call.data == f"{number}":
+            player_info.append(name)
+            tg_id=get_player_tg(db_session,player_info)
+            player_info[0]=tg_id
+            output= db_player_all_time_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За всё время:\n"+output)
+            output= db_player_season_2022_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2022:\n"+output)
+            output= db_player_season_2023_stat(db_session, player_info)
+            bot.send_message(chat_id=call.message.chat.id, text=f"За сезон 2023:\n"+output)
+    for name in name_list:
+        if call.data==f"{name}":         
+            create_lineup(call,name)
+    if call.data=="Готово":
+        check_lineup(call)
+
+def create_lineup(call,name):
+    path = "lineup.txt"
+    if os.path.isfile(path) ==True:
+        file = open("lineup.txt", "r")
+        lines = [line.rstrip() for line in file]
+        file.close
+        print("прочитано")
+        if not lines:
+            file=open("lineup.txt", "a+")
+            file.write(f"{name}")
+            file.write("\n")
+            file.close
+            bot.send_message(chat_id=call.message.chat.id, text=f"Игрок {name} добавлен в состав")
+            print("добавлен")
+        else:
+            if name in lines:
+                bot.send_message(chat_id=call.message.chat.id, text=f"Игрок {name} уже есть в составе")
+                file.close
+                print("уже есть")
+            else:
+                file=open("lineup.txt", "a+")
+                file.write(f"{name}")
+                file.write("\n")
+                file.close
+                bot.send_message(chat_id=call.message.chat.id, text=f"Игрок {name} добавлен в состав")
+    else:
+        bot.send_message(chat_id=call.message.chat.id, text="В данный момент работа модуля невозможна")
+
+def check_lineup(call):
+    path = "lineup.txt"
+    if os.path.isfile(path) ==False:
+        bot.send_message(chat_id=call.message.chat.id, text="Состав не укомплектован")
+        #дописать ветку
+    if os.path.isfile(path) ==True:
+        file = open("lineup.txt", "r")
+        lines = [line.rstrip() for line in file]
+        file.close
+        output=""
+        if len(lines)>=6:
+            for i in range(0,len(lines)):
+                output+=f"{lines[i]}\n"
+            markup = types.InlineKeyboardMarkup()
+            btn=types.InlineKeyboardButton(text="Подтвердить", callback_data="да")
+            markup.add(btn)
+            btn=types.InlineKeyboardButton(text="Отменить", callback_data="нет")
+            markup.add(btn)
+            bot.send_message(chat_id=call.message.chat.id, text=f"Подтвердите состав:\n{output}", reply_markup=markup)
+        else:
+            bot.send_message(chat_id=call.message.chat.id, text="Состав не укомплектован")
+
+def confirm_lineup(call):#брать имена из файла и вызывать бд
+    file = open("lineup.txt", "r")
+    lines = [line.rstrip() for line in file]
+    file.close
+    player_info=[]
+    for i in range(0, len(lines)):
+        player_info.append(f"{lines[i]}")
+    db_insert_games(db_session, player_info)
+    bot.send_message(chat_id=call.message.chat.id, text="Состав сформирован")
 """
 ------------------------------------------УПРАВЛЕНИЕ КОМАНДОЙ---------------------------------
 """
 def TEAM_MANAGEMENT(message):
-    buttons_list = ['Результат матча','Подготовить рассылку','Изменить состав команды','Редактировать профиль игрока','Назад']
+    buttons_list = ['Состав на матч', 'Результат матча','Подготовить рассылку','Изменить состав команды','Редактировать профиль игрока','Назад']
     team_management_keyboard = Keyboard(buttons_list)
     bot.send_message(chat_id=message.chat.id, text='Меню управления командой',reply_markup=team_management_keyboard.get_keyboard())
     bot.register_next_step_handler(message, team_management_menu)
 
 def team_management_menu(message):
+    if message.text=='Состав на матч':
+        team_list(message)
     if message.text=='Результат матча':
         game_result(message)
     if message.text=='Подготовить рассылку':
@@ -282,6 +357,32 @@ def team_management_menu(message):
         edit_profile(message)
     if message.text=='Назад':
         MAIN_ADMIN(message)
+
+"""
+Состав на матч
+"""
+def team_list(message):
+    bot.send_photo(chat_id=message.chat.id,photo=InputFile(FIELD_PHOTO))
+    list=get_names_and_numbers(db_session)
+    markup = types.InlineKeyboardMarkup()
+    buttons_list=[]
+    for i in range(0,len(list)):
+        name=list[i][1]
+        btn=types.InlineKeyboardButton(text=f"{name}", callback_data=f"{name}")
+        buttons_list.append(btn)
+    btn=types.InlineKeyboardButton(text="Готово", callback_data="Готово")
+    buttons_list.append(btn)
+    markup = types.InlineKeyboardMarkup()
+    markup.add(*buttons_list)
+    buttons_list=['Назад']
+    keyboard=Keyboard(buttons_list)
+    bot.send_message(chat_id=message.chat.id, text='Соберите состав', reply_markup=markup)
+    bot.send_message(chat_id=message.chat.id, text="Для выхода из раздела воспользуйтесь кнопкой 'Назад' стандартного меню",reply_markup=keyboard.get_keyboard())
+    bot.register_next_step_handler(message, team_list_menu)
+
+def team_list_menu(message):
+    if message.text=="Назад":
+        TEAM(message)
 
 """
 РЕДАКТИРОВАТЬ ПРОФИЛЬ ИГРОКА
@@ -633,7 +734,14 @@ def team_stat_pt5(message,game_info):
     if message.text =="Подтвердить":
         insert_game_result_team(db_session, game_info)
         insert_game_result_player(db_session,game_info)
-        bot.send_message(chat_id=message.chat.id, text="Статистика изменена")
+        #confirm_file = open("c:/applications/new.txt", "w")
+        with open("c:/applications/change_stat.txt", "w", encoding='utf-8') as file:
+            for  i in range(0,9):
+                file.write(f'{game_info[i]}\n')
+            file.write('Ожидает подтверждения')
+        bot.send_message(chat_id=message.chat.id, text="Статистика ожидает подтверждения")
+        for row in ADMINS_ID_LIST:
+            bot.send_message(chat_id=row, text="Информация ожидает подтверждения")
         TEAM_MANAGEMENT(message)
     if message.text =="Отменить":
         TEAM_MANAGEMENT(message)
