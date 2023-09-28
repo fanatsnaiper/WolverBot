@@ -4,6 +4,7 @@ from engine.valid import *
 import telebot
 from telebot import types
 import os.path
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 @bot.message_handler(commands=['restart'])
 def send_restart(message):
@@ -127,7 +128,7 @@ def my_stat_season_2022(message):
 
     button_list=['Назад']
     season_2022_keyboard=Keyboard(button_list)
-    text=db_player_season_2023_stat(db_session,player_info)
+    text=db_player_season_2022_stat(db_session,player_info)
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=season_2022_keyboard.get_keyboard())
     bot.register_next_step_handler(message, my_stat_by_season_pt1)
 
