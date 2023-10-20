@@ -250,7 +250,7 @@ def callback_inline(call):
     if call.data=="да":
         confirm_lineup(call)
         print("Прошло")
-    if call.data=="нет":#очищать файл и вызывать главное меню либо же добавить ещё одно промежуточное меню с выбором- добавить удалить игрока/покинуть меню 
+    if call.data=="нет":
         print("Не прошло")
         TEAM_MANAGEMENT(call.message)
         open("lineup.txt", "w")
@@ -327,20 +327,21 @@ def check_lineup(call):
         else:
             bot.send_message(chat_id=call.message.chat.id, text="Состав не укомплектован")
 
-def confirm_lineup(call):#брать имена из файла и вызывать бд
-    file = open("lineup.txt", "r")
+def confirm_lineup(call):
+    """file = open("lineup.txt", "r")
     lines = [line.rstrip() for line in file]
     file.close
     player_info=[]
     for i in range(0, len(lines)):
         player_info.append(f"{lines[i]}")
-    db_insert_games(db_session, player_info)
+    db_insert_games(db_session, player_info)"""
     bot.send_message(chat_id=call.message.chat.id, text="Состав сформирован")
+    game_result(call.message)
 """
 ------------------------------------------УПРАВЛЕНИЕ КОМАНДОЙ---------------------------------
 """
 def TEAM_MANAGEMENT(message):
-    buttons_list = ['Состав на матч', 'Результат матча','Подготовить рассылку','Изменить состав команды','Редактировать профиль игрока','Назад']
+    buttons_list = ['День игры','Состав на матч', 'Результат матча','Подготовить рассылку','Изменить состав команды','Редактировать профиль игрока','Назад']
     team_management_keyboard = Keyboard(buttons_list)
     bot.send_message(chat_id=message.chat.id, text='Меню управления командой',reply_markup=team_management_keyboard.get_keyboard())
     bot.register_next_step_handler(message, team_management_menu)
@@ -358,7 +359,6 @@ def team_management_menu(message):
         edit_profile(message)
     if message.text=='Назад':
         MAIN_ADMIN(message)
-
 """
 Состав на матч
 """
@@ -383,7 +383,7 @@ def team_list(message):
 
 def team_list_menu(message):
     if message.text=="Назад":
-        TEAM(message)
+        TEAM_MANAGEMENT(message)
 
 """
 РЕДАКТИРОВАТЬ ПРОФИЛЬ ИГРОКА
