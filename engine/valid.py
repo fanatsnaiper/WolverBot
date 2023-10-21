@@ -35,4 +35,3 @@ class IntValidator(Validator):
         except ValueError:
             return False
 
-
