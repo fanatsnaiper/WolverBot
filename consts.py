@@ -24,6 +24,7 @@ TEST_ID=[1548423795,878297528]
 
 ANSWERS_FILENAME = 'files/user_answers.json'
 MAIN_PHOTO = 'files/mainPhoto.jpg'
+FIELD_PHOTO='files/field1.jpg'
 
 def get_data_from_json_file(path):
     if not os.path.exists(path):

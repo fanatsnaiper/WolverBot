@@ -222,9 +222,11 @@ def insert_game_result_player(conn, game_info):
         rc=player_info[i].split(":")[4]
         sql=f"update players_stat set games=games+1, goals=goals+{goals}, assists=assists+{assists}, yellow_cards=yellow_cards+{yc}, red_cards=red_cards+{rc} where number=(select number from players where name='{name}')"
         sql_arr.append(sql)
+        sql=f"update players_stat_season_2023 set games=games+1, goals=goals+{goals}, assists=assists+{assists}, yellow_cards=yellow_cards+{yc}, red_cards=red_cards+{rc} where number=(select number from players where name='{name}')"
+        sql_arr.append(sql)
     for i in range(0,len(sql_arr)):
         sql=sql_arr[i]
-        conn.execute(sql)
+        conn.execute(sql)   
 
 def insert_game_result_team(conn, game_info):
     wins= game_info[1]
@@ -238,6 +240,13 @@ def insert_game_result_team(conn, game_info):
     sql1=f"update team_stat_season_2023 set games = games + 1, wins=wins +{wins}, loses= loses+ {loses}, draws = draws+{draws}, goals_scored= goals_scored+ {gs}, goals_conceded=goals_conceded + {gc}, yellow_cards= yellow_cards + {yc}, red_cards= red_cards+ {rc}"
     conn.execute(sql)
     conn.execute(sql1)
+
+def db_insert_games(conn,player_info):
+    for name in player_info:
+        sql=f"update players_stat_all_time set games=games +1 where number=(select number from players where name='{name}')"
+        sql1=f"update players_stat_season_2023 set games=games +1 where number=(select number from players where name='{name}')"
+        conn.execute(sql)
+        conn.execute(sql1)
 
 def db_insert_player(conn,player_info):
     number=player_info[0]
