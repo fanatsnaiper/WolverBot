@@ -2,6 +2,8 @@ import logging
 from logging import FileHandler,Formatter
 import os.path
 
+from botError import ParamsError
+
 LOG_INST = [ # пример регистраторов
     'sql',
     'handler',
@@ -9,9 +11,6 @@ LOG_INST = [ # пример регистраторов
 ]
 ERROR,WARNING,INFO,DEBUG = 40,30,20,10
 MIN_LVL = DEBUG # Минимальный уровень записи в журнал
-
-class ParamsError(Exception):
-    pass
 
 
 if __name__ == '__main__':
