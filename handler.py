@@ -303,6 +303,10 @@ def create_lineup(call,name):
                 file.close
                 bot.send_message(chat_id=call.message.chat.id, text=f"Игрок {name} добавлен в состав")
     else:
+        log(LOG_COMMAND.format(reg = 'handler',
+                               file = 'handler',
+                               lvl= 'ERROR',
+                               msg = f"Cannot write to file {path}"))
         bot.send_message(chat_id=call.message.chat.id, text="В данный момент работа модуля невозможна")
 
 def check_lineup(call):
@@ -325,6 +329,10 @@ def check_lineup(call):
             markup.add(btn)
             bot.send_message(chat_id=call.message.chat.id, text=f"Подтвердите состав:\n{output}", reply_markup=markup)
         else:
+            log(LOG_COMMAND.format(reg='handler',
+                                   file='handler',
+                                   lvl='ERROR',
+                                   msg=f"Cannot write to file {path}"))
             bot.send_message(chat_id=call.message.chat.id, text="Состав не укомплектован")
 
 def confirm_lineup(call):

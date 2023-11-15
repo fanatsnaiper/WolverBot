@@ -7,6 +7,8 @@ LOG_INST = [ # пример регистраторов
     'handler',
     'extra'
 ]
+LOGGER_PROGRAM = 'botLog.py'
+LOG_COMMAND = "python botLog.py -r {reg} -f {filename} -l {lvl} -m {msg}"
 ERROR,WARNING,INFO,DEBUG = 40,30,20,10
 MIN_LVL = DEBUG # Минимальный уровень записи в журнал
 

@@ -1,7 +1,7 @@
 import telebot
 from telebot.types import ReplyKeyboardMarkup
 from telebot.types import KeyboardButton, InputFile
-
+from engine.botLog import LOG_COMMAND
 from queries import *
 import os, json, requests
 
@@ -22,6 +22,8 @@ ADMINS_ID_LIST =[1548423795,878297528] #1086926584
 PLAYERS_ID_LIST =[565144419]
 TEST_ID=[1548423795,878297528]
 
+LOGS_DIR = 'log/'
+MAIN_LOGGER_FILENAME = LOGS_DIR + 'botLog.txt'
 ANSWERS_FILENAME = 'files/user_answers.json'
 MAIN_PHOTO = 'files/mainPhoto.jpg'
 FIELD_PHOTO='files/field1.jpg'
@@ -53,6 +55,12 @@ def read_answer(chat_id):
     value = answers['answers'].get(chat_id)
     delete_answer(chat_id)
     return value
+
+def log(cmd):
+    try:
+        os.system(cmd)
+    except:
+        pass
 
 def get_updates():
     updates = requests.get(f'{URL}{TOKEN}/getUpdates?offset=0').json()['result']
